@@ -1,0 +1,38 @@
+﻿ version: '3'
+
+ services:
+   rabbitmq:
+      image: 'rabbitmq:3-management'
+      container_name: rabbitmq-server
+      environment:
+        RABBITMQ_DEFAULT_USER: 'guest'
+        RABBITMQ_DEFAULT_PASS: 'guest'
+      ports:
+       - '15672:15672'
+       - '5672:5672'
+      restart: always
+      networks: 
+       - baritest
+  
+   api:
+    container_name: bariapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      port: 80
+    ports:
+      - '80:80'
+    depends_on: 
+      - rabbitmq
+    links: 
+      - rabbitmq
+    expose:
+      - 5000
+    networks:
+      - baritest
+    restart: always
+
+ networks:
+   baritest:
+     name: baritest
