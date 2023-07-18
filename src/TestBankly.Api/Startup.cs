@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text.Json.Serialization;
+using TestBankly.Api.Consumer;
 using TestBankly.Api.Data;
 using TestBankly.Domain.Interfaces;
 using TestBankly.Infraestructure.Configurations;
@@ -32,6 +34,7 @@ namespace TestBankly
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRouting(options => options.LowercaseUrls = true);
 
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -53,9 +56,9 @@ namespace TestBankly
             services.AddScoped<ITransferAccountService, TransferAccountService>();
             services.AddHttpClient<TransferAccountService>();
 
-            services.AddDbContext<TransactionContext>(options =>
+            services.AddDbContext<Api.Data.TransactionContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddScoped<TransactionContext>();
+            services.AddScoped<Api.Data.TransactionContext>();
 
             //services.AddApiConfiguration(Configuration);
 
@@ -64,6 +67,24 @@ namespace TestBankly
             var serviceSettings = Configuration.GetSection(typeof(ServiceSettings).Name).Get<ServiceSettings>();
             services.AddSingleton(serviceSettings);
             services.Configure<ServiceSettings>(Configuration);
+
+            
+            services.AddMassTransit(bus =>
+            {
+                bus.AddDelayedMessageScheduler();
+                bus.SetKebabCaseEndpointNameFormatter();
+                
+                bus.AddConsumer<QueueTransferConsumer>(typeof(QueueTransferConsumerDefinition));
+
+                bus.UsingRabbitMq((ctx, busConfigurator) =>
+                {
+                    busConfigurator.Host(Configuration.GetConnectionString("RabbitMq"));
+                    busConfigurator.UseDelayedMessageScheduler();
+                    busConfigurator.ConfigureEndpoints(ctx, new KebabCaseEndpointNameFormatter("dev", false));
+                    busConfigurator.UseMessageRetry(retry => { retry.Interval(3, TimeSpan.FromSeconds(5)); });
+                });
+            });
+            //services.AddMassTransitHostedService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

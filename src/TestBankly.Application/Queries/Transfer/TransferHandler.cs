@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using MassTransit;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,14 +17,20 @@ namespace TestBankly.Application.Queries.Transfer
         private readonly ILogger<TransferHandler> _logger;
         private readonly ITransferAccountService _transferAccountService;
         private readonly ITransactionRepository _repository;
+        private readonly IPublishEndpoint _publisher;
+        private readonly IBus _bus;
 
         public TransferHandler(ILogger<TransferHandler> logger,
             ITransferAccountService transferAccountService,
-            ITransactionRepository repository)
+            ITransactionRepository repository,
+            IPublishEndpoint publisher,
+            IBus bus)
         {
             _logger = logger;
             _transferAccountService = transferAccountService;
             _repository = repository;
+            _publisher = publisher;
+            _bus = bus;
         }
         public async Task<TransferResponse> Handle(TransferRequest request, CancellationToken cancellationToken)
         {
@@ -33,15 +41,21 @@ namespace TestBankly.Application.Queries.Transfer
                 return new TransferResponse { Errors = new Errors { Message = "Transferencia deve ter valor maior que zero" } };
 
             var responseOrig = await _transferAccountService.GetAccountByAccountNumberAsync(request.AccountOrigin);
-            if (responseOrig == null)
+            if (responseOrig.StatusCode == 404)
             {
                 return new TransferResponse { Errors = new Errors { Message = "Conta Origem não encontrada" } };
             }
 
             var responseDest = await _transferAccountService.GetAccountByAccountNumberAsync(request.AccountDestination);
-            if (responseDest == null)
+            if (responseDest.StatusCode == 404)
             {
                 return new TransferResponse { Errors = new Errors { Message = "Conta Destino não encontrada" } };
+            }
+
+            if (responseOrig?.StatusCode == 500 || responseDest?.StatusCode == 500)
+            {
+                await _publisher.Publish<TransferRequest>(request);
+                return new TransferResponse { Errors = new Errors { Message = "Erro na api de Accounts. A requisição será enviada para uma fila para processamento posterior" } };
             }
 
             var transactionModel = new Transaction
@@ -80,12 +94,28 @@ namespace TestBankly.Application.Queries.Transfer
                     transactionModel.Status = StausTransactionType.Error;
                     transactionModel.ErrorReason = responseTransDest.Errors.Message;
                 }
-
-                _repository.Update(transactionModel);
             }
+            else
+            {
+                transactionModel.Status = StausTransactionType.Error;
+                transactionModel.ErrorReason = responseTransOrig.Errors.Message;
+            }
+            _repository.Update(transactionModel);
 
-            
-            return new TransferResponse { TransactionId = transactionModel.TransactionId };
+            return new TransferResponse 
+            { 
+                TransactionId = transactionModel.TransactionId, 
+                Errors = transactionModel.ErrorReason == null ? null : new Errors { Message = transactionModel.ErrorReason }  
+            };
+        }
+    }
+
+    public class TransferConsumer : IConsumer<TransferRequest>
+    {
+        public async Task Consume(ConsumeContext<TransferRequest> context)
+        {
+            var jsonMessage = JsonConvert.SerializeObject(context.Message);
+            Console.WriteLine($"OrderCreated message: {jsonMessage}");
         }
     }
 }

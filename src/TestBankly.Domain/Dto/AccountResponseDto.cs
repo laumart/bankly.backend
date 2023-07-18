@@ -8,6 +8,12 @@
         
         public ErrorsDto Errors { get; set; }
 
+        public int StatusCode { get; internal set; }
+
+        public void SetStatusCode(int statusCode)
+        {
+            StatusCode = statusCode;    
+        }
     }
 
 }

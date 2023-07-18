@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31424.327
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBankly.Api", "src\TestBankly.Api\TestBankly.Api.csproj", "{B4F98101-CB8B-41A4-8030-4BC1FBE54F26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBankly.Application", "src\TestBankly.Application\TestBankly.Application.csproj", "{686C5D00-CDFC-4854-BB9D-DA95B3625F71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBankly.Application", "src\TestBankly.Application\TestBankly.Application.csproj", "{686C5D00-CDFC-4854-BB9D-DA95B3625F71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBankly.Domain", "src\TestBankly.Domain\TestBankly.Domain.csproj", "{EB61BBA3-091E-40DD-8D60-A1AEB70DBED5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBankly.Domain", "src\TestBankly.Domain\TestBankly.Domain.csproj", "{EB61BBA3-091E-40DD-8D60-A1AEB70DBED5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBankly.Infraestructure", "src\TestBankly.Infraestructure\TestBankly.Infraestructure.csproj", "{C278372E-5B78-42E0-8575-DA6358B9B75D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBankly.Consumer.Worker", "src\TestBankly.Consumer.Worker\TestBankly.Consumer.Worker.csproj", "{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C278372E-5B78-42E0-8575-DA6358B9B75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C278372E-5B78-42E0-8575-DA6358B9B75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C278372E-5B78-42E0-8575-DA6358B9B75D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

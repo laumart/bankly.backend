@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using TestBankly.Domain.Dto;
 using TestBankly.Domain.Interfaces;
@@ -21,8 +22,16 @@ namespace TestBankly.Infraestructure.Services
         {
             var url = $"api/Account/{accountNumer}";
             var response = await _httpClient.GetAsync(url);
-
-            return await DesserializerObject<AccountResponseDto>(response);
+            if (response.IsSuccessStatusCode)
+            {
+                return await DesserializerObject<AccountResponseDto>(response);
+            }
+            else 
+            {
+                var responseAccount = new AccountResponseDto { Errors = new ErrorsDto { Message = await response.Content.ReadAsStringAsync() } };
+                responseAccount.SetStatusCode(Convert.ToInt32(response.StatusCode));
+                return responseAccount;
+            }
         }
 
         public async Task<AccountTransactionResponseDto> PostAccountTransactionAsync(AccountTransactionRequestDto request)
