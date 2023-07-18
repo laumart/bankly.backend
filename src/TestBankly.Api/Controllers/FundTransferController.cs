@@ -31,7 +31,7 @@ namespace TestBankly.Controllers
             
             request.SetIdempotencyKey(idempotencyKey.ToString()); 
             var response = await _mediator.Send(request, cancellation);
-            if (response != null && response.Errors != null)
+            if (response != null && response.Errors == null)
                 return Created("", response);
             else
                 return UnprocessableEntity(response);

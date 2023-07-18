@@ -34,7 +34,9 @@ namespace TestBankly.Application.Queries.Transfer
         }
         public async Task<TransferResponse> Handle(TransferRequest request, CancellationToken cancellationToken)
         {
-            var transaction = _repository.GetByTransactionId(request.TransactionId);
+            var transaction = await _repository.GetByTransactionId(request.TransactionId);
+            _logger.LogInformation("inicio transfer handler");
+
             if (transaction != null)
                 return new TransferResponse { Errors = new Errors { Message = "Essa chave de idempotencia está sendo utilizada" } };
 
