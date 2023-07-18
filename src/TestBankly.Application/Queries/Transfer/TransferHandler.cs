@@ -34,6 +34,10 @@ namespace TestBankly.Application.Queries.Transfer
         }
         public async Task<TransferResponse> Handle(TransferRequest request, CancellationToken cancellationToken)
         {
+            var transaction = _repository.GetByTransactionId(request.TransactionId);
+            if (transaction != null)
+                return new TransferResponse { Errors = new Errors { Message = "Essa chave de idempotencia está sendo utilizada" } };
+
             if (request.AccountOrigin == request.AccountDestination)
                 return new TransferResponse { Errors = new Errors { Message = "Contas Origem e destino não podem ser iguais" } };
 
@@ -62,11 +66,12 @@ namespace TestBankly.Application.Queries.Transfer
             {
                 AccountOrigin = request.AccountOrigin,
                 AccountDestination = request.AccountDestination,
-                TransactionId = Guid.NewGuid().ToString(),
+                TransactionId = request.TransactionId,
                 Value = request.Value,
                 Status = StausTransactionType.Processing
             };
 
+           
             _repository.Add(transactionModel);
 
             var responseTransOrig = await _transferAccountService.PostAccountTransactionAsync(new Domain.Dto.AccountTransactionRequestDto

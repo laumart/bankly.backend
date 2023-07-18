@@ -12,6 +12,13 @@ namespace TestBankly.Application.Queries.Transfer
         public string AccountDestination { get; set; }
         [Required]
         public int Value { get; set; }
+        public string TransactionId { get; internal set; }
+
+        
+        public void SetIdempotencyKey(string idempotencyKey)
+        {
+            TransactionId = idempotencyKey;
+        }
     }
 
 }

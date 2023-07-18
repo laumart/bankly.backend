@@ -1,19 +1,12 @@
-using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Text.Json.Serialization;
-using TestBankly.Api.Consumer;
-using TestBankly.Api.Data;
-using TestBankly.Domain.Interfaces;
+using TestBankly.Api.Configurations;
 using TestBankly.Infraestructure.Configurations;
-using TestBankly.Infraestructure.Repository;
-using TestBankly.Infraestructure.Services;
 
 namespace TestBankly
 {
@@ -42,49 +35,16 @@ namespace TestBankly
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             });
+            services.AddLoggerSerilog();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TesteBankly", Version = "v1" });
             });
 
-            var assembly = AppDomain.CurrentDomain.Load("TestBankly.Application");
-            services.AddMediatR((conf) =>
-            {
-                conf.RegisterServicesFromAssembly(assembly);
-            });
-
-            services.AddScoped<ITransferAccountService, TransferAccountService>();
-            services.AddHttpClient<TransferAccountService>();
-
-            services.AddDbContext<Api.Data.TransactionContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddScoped<Api.Data.TransactionContext>();
-
-            //services.AddApiConfiguration(Configuration);
-
-            services.AddScoped<ITransactionRepository, TransactionRepository>();
-
-            var serviceSettings = Configuration.GetSection(typeof(ServiceSettings).Name).Get<ServiceSettings>();
-            services.AddSingleton(serviceSettings);
-            services.Configure<ServiceSettings>(Configuration);
-
+            services.AddServices(Configuration);
+            services.AddRepository(Configuration);
             
-            services.AddMassTransit(bus =>
-            {
-                bus.AddDelayedMessageScheduler();
-                bus.SetKebabCaseEndpointNameFormatter();
-                
-                bus.AddConsumer<QueueTransferConsumer>(typeof(QueueTransferConsumerDefinition));
-
-                bus.UsingRabbitMq((ctx, busConfigurator) =>
-                {
-                    busConfigurator.Host(Configuration.GetConnectionString("RabbitMq"));
-                    busConfigurator.UseDelayedMessageScheduler();
-                    busConfigurator.ConfigureEndpoints(ctx, new KebabCaseEndpointNameFormatter("dev", false));
-                    busConfigurator.UseMessageRetry(retry => { retry.Interval(3, TimeSpan.FromSeconds(5)); });
-                });
-            });
-            //services.AddMassTransitHostedService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

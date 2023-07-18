@@ -6,7 +6,7 @@ namespace TestBankly.Domain.Interfaces
 {
     public  interface ITransactionRepository
     {
-        Task<Transaction> GetByTransactionId(string id);
+        Task<Transaction> GetByTransactionId(string TransactionId);
         void Add(Transaction transaction);
         void Update(Transaction transaction);
     }

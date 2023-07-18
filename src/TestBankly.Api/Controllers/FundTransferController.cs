@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Serilog;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,23 +16,26 @@ namespace TestBankly.Controllers
     public class FundTransferController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<FundTransferController> _logger;
+        private readonly ILogger _logger;
 
-        public FundTransferController(IMediator mediator, ILogger<FundTransferController> logger)
+        public FundTransferController(IMediator mediator, ILogger logger)
         {
             _mediator = mediator;
             _logger = logger;
         }
 
         [HttpPost]
-        public async Task<ActionResult<TransferResponse>> PostAsync([FromBody] TransferRequest request, CancellationToken cancellation)
+        public async Task<ActionResult<TransferResponse>> PostAsync([FromHeader(Name = "idempotency-Key")][Required] Guid idempotencyKey, 
+            [FromBody] TransferRequest request, CancellationToken cancellation)
         {
+            
+            request.SetIdempotencyKey(idempotencyKey.ToString()); 
             var response = await _mediator.Send(request, cancellation);
-            if(response != null && response.Errors != null)
+            if (response != null && response.Errors != null)
                 return Created("", response);
             else
                 return UnprocessableEntity(response);
-            
+
         }
 
         [HttpGet("{transactionId}")]
