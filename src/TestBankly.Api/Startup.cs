@@ -69,7 +69,7 @@ namespace TestBankly
                 endpoints.MapControllers();
             });
 
-            app.UseSerilog(Log.Logger);
+            
         }
     }
 }
