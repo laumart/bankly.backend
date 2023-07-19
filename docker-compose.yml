@@ -22,7 +22,7 @@
      environment: 
        port: 80
      ports:
-       - '80:80'
+       - '5011:80'
      depends_on: 
        - rabbitmq
      links: 
@@ -39,7 +39,7 @@
      environment: 
        port: 80
      ports:
-       - '80:80'
+       - '5000:80'
      expose:
        - 5000
      networks:
