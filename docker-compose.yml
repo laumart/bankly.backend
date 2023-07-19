@@ -12,10 +12,10 @@
        - '5672:5672'
       restart: always
       networks: 
-       - baritest
+       - bankly
   
    api:
-    container_name: bariapi
+    container_name: bankly_api
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,11 +28,60 @@
     links: 
       - rabbitmq
     expose:
-      - 5000
+      - 5011
     networks:
-      - baritest
+      - bankly
     restart: always
 
+   api_accounts:
+    container_name: bankly_accounts
+    image: baldini/testacesso
+    environment: 
+     port: 80
+    ports:
+     - '80:80'
+    expose:
+     - 5000
+    networks:
+     - bankly
+   
+   elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=false
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - discovery.type=single-node
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=jojrn2iMk8nh+WbapCCb
+    networks:
+      - bankly
+   
+   kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.16.3
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://localhost:9200
+      - ELASTICSEARCH_USERNAME=elastic
+    - ELASTICSEARCH_PASSWORD=jojrn2iMk8nh+WbapCCb
+   networks:
+    - bankly
+  
  networks:
-   baritest:
-     name: baritest
+   elastic:
+     driver: bridge
+
+ volumes:
+   elasticsearch-data:
+  networks:
+    bankly:
+      name: bankly
