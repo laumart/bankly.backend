@@ -2,52 +2,52 @@
 
  services:
    rabbitmq:
-      image: 'rabbitmq:3-management'
-      container_name: rabbitmq-server
-      environment:
-        RABBITMQ_DEFAULT_USER: 'guest'
-        RABBITMQ_DEFAULT_PASS: 'guest'
-      ports:
-       - '15672:15672'
-       - '5672:5672'
-      restart: always
-      networks: 
-       - bankly
+     image: 'rabbitmq:3-management'
+     container_name: rabbitmq-server
+     environment:
+       RABBITMQ_DEFAULT_USER: 'guest'
+       RABBITMQ_DEFAULT_PASS: 'guest'
+     ports:
+      - '15672:15672'
+      - '5672:5672'
+     restart: always
+     networks: 
+      - bankly
   
    api:
-    container_name: bankly_api
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment: 
-      port: 80
-    ports:
-      - '80:80'
-    depends_on: 
-      - rabbitmq
-    links: 
-      - rabbitmq
-    expose:
-      - 5011
-    networks:
-      - bankly
-    restart: always
+     container_name: bankly_api
+     build:
+       context: .
+       dockerfile: .\src\TestBankly.Api\Dockerfile
+     environment: 
+       port: 80
+     ports:
+       - '80:80'
+     depends_on: 
+       - rabbitmq
+     links: 
+       - rabbitmq
+     expose:
+       - 5011
+     networks:
+       - bankly
+     restart: always
 
    api_accounts:
-    container_name: bankly_accounts
-    image: baldini/testacesso
-    environment: 
-     port: 80
-    ports:
-     - '80:80'
-    expose:
-     - 5000
-    networks:
-     - bankly
+     container_name: bankly_accounts
+     image: baldini/testacesso
+     environment: 
+       port: 80
+     ports:
+       - '80:80'
+     expose:
+       - 5000
+     networks:
+       - bankly
    
    elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
     ports:
       - 9200:9200
     volumes:
@@ -63,25 +63,22 @@
       - bankly
    
    kibana:
-    container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.16.3
-    ports:
-      - 5601:5601
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTICSEARCH_URL=http://localhost:9200
-      - ELASTICSEARCH_USERNAME=elastic
-    - ELASTICSEARCH_PASSWORD=jojrn2iMk8nh+WbapCCb
-   networks:
-    - bankly
-  
+     container_name: kibana
+     image: docker.elastic.co/kibana/kibana:8.8.2
+     ports:
+       - 5601:5601
+     depends_on:
+       - elasticsearch
+     environment:
+       - ELASTICSEARCH_URL=http://localhost:9200
+       - ELASTICSEARCH_USERNAME=elastic
+       - ELASTICSEARCH_PASSWORD=jojrn2iMk8nh+WbapCCb
+     networks:
+       - bankly
+     
  networks:
-   elastic:
+   bankly:
      driver: bridge
 
  volumes:
    elasticsearch-data:
-  networks:
-    bankly:
-      name: bankly
