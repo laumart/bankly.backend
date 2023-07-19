@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBankly.Domain", "src\Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBankly.Infraestructure", "src\TestBankly.Infraestructure\TestBankly.Infraestructure.csproj", "{C278372E-5B78-42E0-8575-DA6358B9B75D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBankly.Consumer.Worker", "src\TestBankly.Consumer.Worker\TestBankly.Consumer.Worker.csproj", "{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{C278372E-5B78-42E0-8575-DA6358B9B75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C278372E-5B78-42E0-8575-DA6358B9B75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C278372E-5B78-42E0-8575-DA6358B9B75D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{601B7E3E-CC50-4715-9DC4-EAD5F209EBA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Exceptions;
+using Serilog.Filters;
 using Serilog.Sinks.Elasticsearch;
 using System;
 using System.IO;
@@ -12,16 +15,16 @@ namespace TestBankly.Api.Configurations
 {
     public static class LoggingConfig
     {
-        public static IServiceCollection AddLoggerSerilog(this IServiceCollection services)
-        {
-            var logger = LoggerManager.CreateLogger();
-            services.AddSingleton(logger);
-            return services;
-        }
+        //public static IServiceCollection AddLoggerSerilog(this IServiceCollection services)
+        //{
+        //    var logger = LoggerManager.CreateLogger();
+        //    services.AddSingleton(logger);
+        //    return services;
+        //}
 
-        public static class LoggerManager
-        {
-            public static Serilog.ILogger CreateLogger()
+        //public static class LoggerManager
+        //{
+            public static WebApplicationBuilder AddSerilog(this WebApplicationBuilder builder)
             {
                 var configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
@@ -38,11 +41,15 @@ namespace TestBankly.Api.Configurations
                     .WriteTo.Console()
                     .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
                     .Enrich.WithProperty("Environment", environment)
+                    .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.StaticFiles"))
                     .ReadFrom.Configuration(configuration)
                   .ReadFrom.Configuration(configuration)
                   .CreateLogger();
 
-                return Log.Logger;
+                builder.Logging.ClearProviders();
+                builder.Host.UseSerilog(Log.Logger, true);
+
+                return builder;
             }
 
             private static ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment)
@@ -53,7 +60,7 @@ namespace TestBankly.Api.Configurations
                     IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".", "-")}-{environment?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}"
                 };
             }
-        }
+        //}
     }
 
 

@@ -98,6 +98,12 @@ namespace TestBankly.Application.Queries.Transfer
                 }
                 else
                 {
+                    var reverseTransfOrig = await _transferAccountService.PostAccountTransactionAsync(new Domain.Dto.AccountTransactionRequestDto
+                    {
+                        AccountNumber = request.AccountOrigin,
+                        Value = request.Value,
+                        Type = TransferType.Credit
+                    });
                     transactionModel.Status = StausTransactionType.Error;
                     transactionModel.ErrorReason = responseTransDest.Errors.Message;
                 }
