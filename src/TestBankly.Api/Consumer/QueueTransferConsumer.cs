@@ -42,6 +42,8 @@ namespace TestBankly.Api.Consumer
                 };
                 request.SetIdempotencyKey(context.Message.TransactionId);
                 var response = await mediator.Send(request);
+
+                await Task.Delay(TimeSpan.FromSeconds(30));
             }
             catch (Exception ex)
             {

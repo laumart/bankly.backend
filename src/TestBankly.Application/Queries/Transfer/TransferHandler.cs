@@ -33,10 +33,11 @@ namespace TestBankly.Application.Queries.Transfer
         }
         public async Task<TransferResponse> Handle(TransferRequest request, CancellationToken cancellationToken)
         {
-            var response = await PreValidation(request);
+            var transactionModel = await _repository.GetByTransactionId(request.TransactionId);
+
+            var response = await PreValidation(request, transactionModel);
             if (response != null) { return response; }
 
-            var transactionModel = await _repository.GetByTransactionId(request.TransactionId);
             if (transactionModel == null)
             {
                 transactionModel = InsertTransaction(request, StausTransactionType.Processing);
@@ -111,9 +112,8 @@ namespace TestBankly.Application.Queries.Transfer
 
         }
 
-        private async Task<TransferResponse> PreValidation(TransferRequest request)
+        private async Task<TransferResponse> PreValidation(TransferRequest request, Domain.Models.Transaction transaction)
         {
-            var transaction = await _repository.GetByTransactionId(request.TransactionId);
             _logger.LogInformation("inicio transfer handler");
 
             if (transaction != null && transaction.Status != StausTransactionType.InQueue)
@@ -130,7 +130,7 @@ namespace TestBankly.Application.Queries.Transfer
             {
                 return new TransferResponse { Errors = new Errors { Message = "Conta Origem não encontrada" } };
             }
-            else if (responseOrig.Balance < request.Value && responseOrig.Errors != null)
+            else if (responseOrig.Balance < request.Value && responseOrig.Errors == null)
             {
                 return new TransferResponse { Errors = new Errors { Message = "Saldo insuficiente para realizar a transação." } };
             }
