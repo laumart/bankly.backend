@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using TestBankly.Application.Base;
 using TestBankly.Domain.Dto;
 using TestBankly.Domain.Interfaces;
 using TestBankly.Infraestructure.Configurations;
@@ -42,7 +43,7 @@ namespace TestBankly.Infraestructure.Services
             if (response.IsSuccessStatusCode)
                 return new AccountTransactionResponseDto { Success = true };
 
-            return new AccountTransactionResponseDto { Errors = new ErrorsDto { Message = await response.Content.ReadAsStringAsync() } };
+            return new AccountTransactionResponseDto { Success = false, Errors = new ErrorsDto { Message = await response.Content.ReadAsStringAsync() } };
         }
 
     }
